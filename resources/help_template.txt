@@ -1,0 +1,72 @@
+*$(name).txt*	$(raw description)
+
+Version: $(raw version)
+Author : $(raw author)
+License: $(raw license)
+
+==============================================================================
+CONTENTS					*$(name)-contents*
+
+Introduction					|$(name)-introduction|
+Interface					|$(name)-interface|
+  Commands					|$(name)-commands|
+  Functions					|$(name)-functions|
+  Key Mappings					|$(name)-key-mappings|
+Customizing					|$(name)-customizing|
+Changelog					|$(name)-changelog|
+
+==============================================================================
+Introduction					*$(name)-introduction*
+
+$(raw introduction)
+
+==============================================================================
+Interface						*$(name)-interface*
+
+------------------------------------------------------------------------------
+Commands						*$(name)-commands*
+
+@(for command)
+$(name)				*$(name)*
+$(raw text)
+@(end)
+
+------------------------------------------------------------------------------
+Functions					*$(name)-functions*
+
+@(for function)
+$(name)				*$(name)*
+$(raw text)
+
+@(end)
+
+------------------------------------------------------------------------------
+Key Mappings					*$(name)-key-mappings*
+
+@(for mapping)
+$(name)				*$(name)*
+$(raw text)
+
+@(end)
+
+==============================================================================
+Customizing					*$(name)-customizing*
+
+@(for customize)
+$(name)				*$(name)*
+$(raw text)
+
+@(end)
+
+==============================================================================
+Changelog					*$(name)-changelog*
+
+@(if changelog)
+$(raw changelog)
+@(end)
+@(if-not changelog)
+See git-log.
+@(end)
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:fdl=0:

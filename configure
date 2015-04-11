@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+CWD=$(pwd)
+JAR=$(ls target/*standalone.jar)
+BIN="bin/vimdoc"
+
+if [[ ! -d "bin" ]]; then
+    mkdir bin
+fi
+
+cat <<EOT > $BIN
+#!/usr/bin/env bash
+java -jar $CWD/$JAR "\$@"
+EOT
+chmod +x $BIN
