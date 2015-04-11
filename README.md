@@ -2,9 +2,16 @@
 
 Yet another vim helpfile generation tool.
 
+**clj-vimdoc is ALPHA version.**
+
 ## Install
 
-FIXME
+```
+git clone https://github.com/liquidz/clj-vimdoc
+cd clj-vimdoc
+./configure
+ln -s bin/vimdoc /path/to/your/bin
+```
 
 ## Usage
 
