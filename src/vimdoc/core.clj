@@ -12,9 +12,7 @@
 (def ^:const TEMPLATE_FILE "help_template.txt")
 (def ^:const PLUGIN_DIRS   ["plugin" "autoload" "ftplugin"])
 
-(defn- str-drop [n s] (apply str (drop n s)))
-(defn- str-drop-last [n s] (apply str (drop-last n s)))
-
+(defn- str-drop [n s] (str/join (drop n s)))
 (defn- meta-line? [s] (.startsWith s "@"))
 
 (defn pickup-doc-comments
@@ -26,7 +24,7 @@
     (if-not line
       result
       (if started?
-        (if (.startsWith line "\" ")
+        (if (.startsWith line "\"")
           (recur rest-lines true (conj tmp (str-drop 2 line)) result)
           (recur rest-lines false [] (conj result (conj tmp line))))
         (recur rest-lines (.startsWith line "\"\"") [] result)))))
@@ -36,6 +34,7 @@
    "@function"     :function
    "@command"      :command
    "@customize"    :customize
+   "@var"          :customize
    "@changelog"    :changelog})
 
 (defn- get-type-from-comments
@@ -63,12 +62,10 @@
 
 (defn parse-function
   [s]
-  (let [start (inc (.indexOf s " "))
-        end   (.lastIndexOf s " ")
-        func  (apply str (drop start (take end s)))
-        i     (.indexOf func "(")]
-    {:name (apply str (take i func))
-     :arg  (apply str (drop i func))}))
+  (let [regexp #"function!?\s+([^ (]+?)\s*(\(.*?\))"
+        [_ func arg] (re-find regexp s)]
+    {:name func
+     :arg  arg}))
 
 (defn parse-command
   [s]
@@ -93,8 +90,10 @@
               t (or (get-type-from-comments strings)
                     (get-type-from-definition definition)
                     :introduction)
-              text (str/join "\n" (remove meta-line? strings))
-              base {:type t, :text text}]
+              lines (remove meta-line? strings)
+              text  (str/join "\n" lines)
+              indented-text (str/join "\n" (map (fn [s] (str "\t" s)) lines))
+              base {:type t, :text text, :indented-text indented-text}]
           (merge
             base
             (case t
@@ -142,6 +141,16 @@
     files
     exclude-list))
 
+(defn generate-help
+  [target-dir conf]
+  (->> (get-vim-files target-dir)
+       (exclude-files (:exclude conf))
+       (mapcat pickup-doc-comments)
+       parse-docs
+       categorize-docs
+       (merge conf)
+       render-help))
+
 (defn -main
   [target-dir]
   (let [target-dir (.getAbsolutePath (io/file target-dir))
@@ -151,11 +160,5 @@
 
     (.mkdir (io/file doc-dir))
 
-    (->> (get-vim-files target-dir)
-         (exclude-files (:exclude conf))
-         (mapcat pickup-doc-comments)
-         parse-docs
-         categorize-docs
-         (merge conf)
-         render-help
-         (spit help-file))))
+    (spit help-file
+          (generate-help target-dir conf))))
