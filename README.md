@@ -1,4 +1,4 @@
-# clj-vimdoc
+# clj-vimdoc [![Circle CI](https://circleci.com/gh/liquidz/clj-vimdoc.svg?style=svg)](https://circleci.com/gh/liquidz/clj-vimdoc)
 
 Yet another vim helpfile generation tool.
 
