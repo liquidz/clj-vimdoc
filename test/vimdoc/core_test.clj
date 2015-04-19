@@ -33,10 +33,10 @@
     (is (= "bar" (:foo conf)))
     (is (every? #(= java.util.regex.Pattern (type %)) (:exclude conf)))))
 
-(deftest parse-docs-test
+(deftest parse-doc-test
   (testing "function"
     (let [doc ["foo" "bar" "function! foo#bar(a, b) abort"]
-          ret (first (parse-docs [doc]))]
+          ret (parse-doc doc)]
       (are [x y] (= x y)
         :function      (:type ret)
         "foo\nbar"     (:text ret)

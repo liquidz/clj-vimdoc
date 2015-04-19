@@ -9,7 +9,7 @@
 
 (def ^:const DOC_DIR_NAME       "doc")
 (def ^:const VIMDOC_YAML        "vimdoc.yml")
-(def ^:const TEMPLATE_FILE      "help_template.txt")
+(def ^:const HELP_TEMPLATE_FILE "help_template.txt")
 (def ^:const YAML_TEMPLATE_FILE "yaml_template.txt")
 (def ^:const PLUGIN_DIRS        ["plugin" "autoload" "ftplugin"])
 
@@ -84,26 +84,25 @@
   [s]
   {:name (re-find #"g:[^'\" ]+" s)})
 
-(defn parse-docs
-  [ls]
-  (map #(let [strings    (drop-last %)
-              definition (last %)
-              t (or (get-type-from-comments strings)
-                    (get-type-from-definition definition)
-                    :introduction)
-              lines (remove meta-line? strings)
-              text  (str/join "\n" lines)
-              indented-text (str/join "\n" (map (fn [s] (str "\t" s)) lines))
-              base {:type t, :text text, :indented-text indented-text}]
-          (merge
-            base
-            (case t
-              :function  (parse-function definition)
-              :command   (parse-command definition)
-              :customize (parse-customize definition)
-              :mapping   (parse-mapping definition)
-              {})))
-       ls))
+(defn parse-doc
+  [doc]
+  (let [strings    (drop-last doc)
+        definition (last doc)
+        t (or (get-type-from-comments strings)
+              (get-type-from-definition definition)
+              :introduction)
+        lines (remove meta-line? strings)
+        text  (str/join "\n" lines)
+        indented-text (str/join "\n" (map #(str "\t" %) lines))
+        base {:type t, :text text, :indented-text indented-text}]
+    (merge
+      base
+      (case t
+        :function  (parse-function definition)
+        :command   (parse-command definition)
+        :customize (parse-customize definition)
+        :mapping   (parse-mapping definition)
+        {}))))
 
 (defn categorize-docs
   [docs]
@@ -114,7 +113,7 @@
 
 (defn render-help
   ([docs]
-   (render-help TEMPLATE_FILE docs))
+   (render-help HELP_TEMPLATE_FILE docs))
   ([tmpl-file docs]
    (-> tmpl-file
        io/resource
@@ -142,33 +141,35 @@
     files
     exclude-list))
 
-(defn generate-help
+(defn generate-helpfile
   [target-dir conf]
   (->> (get-vim-files target-dir)
        (exclude-files (:exclude conf))
        (mapcat pickup-doc-comments)
-       parse-docs
+       (map parse-doc)
        categorize-docs
        (merge conf)
        render-help))
 
-(defn generate-initial-vimdoc
+(defn write-helpfile
+  [target-dir]
+  (let [doc-dir    (path/join target-dir DOC_DIR_NAME)
+        conf       (load-config (path/join target-dir VIMDOC_YAML))
+        help-file  (path/join doc-dir (str (:name conf) ".txt"))]
+    (.mkdir (io/file doc-dir))
+    (spit help-file (generate-helpfile target-dir conf))))
+
+(defn write-initial-vimdoc
   []
   (let [s (-> YAML_TEMPLATE_FILE io/resource slurp (render {}))
         f (io/file (path/join "." VIMDOC_YAML))]
     (spit f s)))
 
 (defn -main
-  [target-dir]
-
-  (condp = target-dir
+  [subcmd]
+  (condp = subcmd
     "init" (do (println (str "generating " VIMDOC_YAML " ..."))
-               (generate-initial-vimdoc))
-    (let [target-dir (.getAbsolutePath (io/file target-dir))
-          doc-dir    (path/join target-dir DOC_DIR_NAME)
-          conf       (load-config (path/join target-dir VIMDOC_YAML))
-          help-file  (path/join doc-dir (str (:name conf) ".txt"))]
-
-      (.mkdir (io/file doc-dir))
-      (spit help-file
-            (generate-help target-dir conf)))))
+               (write-initial-vimdoc))
+    (let [target-dir (.getAbsolutePath (io/file subcmd))
+          conf       (load-config (path/join target-dir VIMDOC_YAML))]
+      (write-helpfile target-dir))))
