@@ -9,8 +9,4 @@
 
   :main vimdoc.core
   :aot [vimdoc.core]
-  :uberjar-name "vimdoc-standalone.jar"
-
-  ;:profiles {:dev {:source-paths ["dev"]}}
-  ;:aliases {"dev" ["run" "-m" "dev/-main"]}
-  )
+  :uberjar-name "vimdoc-standalone.jar")

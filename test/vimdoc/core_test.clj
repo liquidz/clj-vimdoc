@@ -1,7 +1,9 @@
 (ns vimdoc.core-test
   (:require
-    [clojure.test :refer :all]
-    [vimdoc.core  :refer :all]))
+    [clojure.test     :refer :all]
+    [clojure.java.io  :as io]
+    [vimdoc.core      :refer :all]
+    [vimdoc.util.path :as path]))
 
 (deftest parse-command-test
   (are [x y] (= x (parse-command y))
@@ -41,3 +43,25 @@
         "\tfoo\n\tbar" (:indented-text ret)
         "foo#bar"      (:name ret)
         "(a, b)"       (:arg ret)))))
+
+(deftest -main-test
+  (testing "init vimdoc.yml"
+    (do (-main "init")
+        (let [f (->> VIMDOC_YAML (path/join ".") io/file)]
+          (is (.exists f))
+          (.delete f))))
+
+  (testing "generate helpfile"
+    (let [plugin-dir (path/join "test" "files" "test_plugin")
+          doc-dir    (path/join plugin-dir "doc")
+          helpfile   (path/join doc-dir "foo.txt")]
+      (-main plugin-dir)
+
+      (are [x] (true? (.exists (io/file x)))
+        doc-dir
+        helpfile)
+      (is (= (slurp helpfile)
+             (slurp (path/join plugin-dir "expected_helpfile.txt"))))
+
+      (doseq [x [helpfile doc-dir]]
+        (.delete (io/file x))))))
