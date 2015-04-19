@@ -15,6 +15,12 @@ ln -s bin/vimdoc /path/to/your/bin
 
 ## Usage
 
+ * generate vimdoc.yml template
+```
+cd /path/to/vim/plugin
+vimdoc init
+```
+ * generate helpfile
 ```
 cd /path/to/vim/plugin
 vimdoc .

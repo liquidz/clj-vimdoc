@@ -7,10 +7,11 @@
     [cuma.core        :refer [render]]
     [vimdoc.util.path :as path]))
 
-(def ^:const DOC_DIR_NAME  "doc")
-(def ^:const VIMDOC_YAML   "vimdoc.yml")
-(def ^:const TEMPLATE_FILE "help_template.txt")
-(def ^:const PLUGIN_DIRS   ["plugin" "autoload" "ftplugin"])
+(def ^:const DOC_DIR_NAME       "doc")
+(def ^:const VIMDOC_YAML        "vimdoc.yml")
+(def ^:const TEMPLATE_FILE      "help_template.txt")
+(def ^:const YAML_TEMPLATE_FILE "yaml_template.txt")
+(def ^:const PLUGIN_DIRS        ["plugin" "autoload" "ftplugin"])
 
 (defn- str-drop [n s] (str/join (drop n s)))
 (defn- meta-line? [s] (.startsWith s "@"))
@@ -151,14 +152,23 @@
        (merge conf)
        render-help))
 
+(defn generate-initial-vimdoc
+  []
+  (let [s (-> YAML_TEMPLATE_FILE io/resource slurp (render {}))
+        f (io/file (path/join "." VIMDOC_YAML))]
+    (spit f s)))
+
 (defn -main
   [target-dir]
-  (let [target-dir (.getAbsolutePath (io/file target-dir))
-        doc-dir    (path/join target-dir DOC_DIR_NAME)
-        conf       (load-config (path/join target-dir VIMDOC_YAML))
-        help-file  (path/join doc-dir (str (:name conf) ".txt"))]
 
-    (.mkdir (io/file doc-dir))
+  (condp = target-dir
+    "init" (do (println (str "generating " VIMDOC_YAML " ..."))
+               (generate-initial-vimdoc))
+    (let [target-dir (.getAbsolutePath (io/file target-dir))
+          doc-dir    (path/join target-dir DOC_DIR_NAME)
+          conf       (load-config (path/join target-dir VIMDOC_YAML))
+          help-file  (path/join doc-dir (str (:name conf) ".txt"))]
 
-    (spit help-file
-          (generate-help target-dir conf))))
+      (.mkdir (io/file doc-dir))
+      (spit help-file
+            (generate-help target-dir conf)))))
