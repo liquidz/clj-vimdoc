@@ -85,6 +85,10 @@
   [s]
   {:name (re-find #"g:[^'\" ]+" s)})
 
+(defn- add-indent
+  [s]
+  (if (= s "<") s (str "\t" s)))
+
 (defn parse-doc
   [doc]
   (let [strings    (drop-last doc)
@@ -94,7 +98,7 @@
               :introduction)
         lines (remove meta-line? strings)
         text  (str/join "\n" lines)
-        indented-text (str/join "\n" (map #(str "\t" %) lines))
+        indented-text (str/join "\n" (map add-indent lines))
         base {:type t, :text text, :indented-text indented-text}]
     (merge
       base
