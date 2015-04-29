@@ -24,7 +24,6 @@ Introduction					*foo-introduction*
 hello
 world
 
-
 ==============================================================================
 Interface					*foo-interface*
 

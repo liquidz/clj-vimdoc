@@ -6,6 +6,7 @@
     [clj-yaml.core    :as yaml]
     [cuma.core        :refer [render]]
     [vimdoc.util.path :as path]
+    [vimdoc.util.seq  :as seq]
     cuma.extension.vimdoc))
 
 (def ^:const DOC_DIR_NAME       "doc")
@@ -27,8 +28,10 @@
       result
       (if started?
         (if (.startsWith line "\"")
-          (recur rest-lines true (conj tmp (str-drop 2 line)) result)
-          (recur rest-lines false [] (conj result (conj tmp line))))
+          (recur rest-lines true
+                 (conj tmp (str-drop 2 line)) result)
+          (recur rest-lines false
+                 [] (conj result (conj (seq/trim tmp) line))))
         (recur rest-lines (.startsWith line "\"\"") [] result)))))
 
 (def ann

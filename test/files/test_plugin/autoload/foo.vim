@@ -6,6 +6,7 @@
 ""
 " @var
 " enabling flag
+"
 if !exists('g:foo#enale')
   let g:foo#enable = 0
 endif
