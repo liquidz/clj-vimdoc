@@ -31,14 +31,14 @@ Interface					*foo-interface*
 ------------------------------------------------------------------------------
 Commands					*foo-commands*
 
-Foo				*Foo*
+Foo						*Foo*
 	Execute |foo#plus|
 
 
 ------------------------------------------------------------------------------
 Functions					*foo-functions*
 
-foo#plus(x, y)				*foo#plus*
+foo#plus(x, y)					*foo#plus*
 	Return (x + y)
 	this is test function
 	Example: >
@@ -55,7 +55,7 @@ Key Mappings					*foo-key-mappings*
 ==============================================================================
 Customizing					*foo-customizing*
 
-g:foo#enale				*g:foo#enale*
+g:foo#enale					*g:foo#enale*
 	enabling flag
 
 

@@ -30,7 +30,7 @@ Interface					*$(name)-interface*
 Commands					*$(name)-commands*
 
 @(for command)
-$(name)				*$(name)*
+$(append-tabs name)*$(name)*
 $(raw indented-text)
 @(end)
 
@@ -38,7 +38,7 @@ $(raw indented-text)
 Functions					*$(name)-functions*
 
 @(for function)
-$(name)$(arg)				*$(name)*
+$(append-tabs name arg)*$(name)*
 $(raw indented-text)
 
 @(end)
@@ -47,7 +47,7 @@ $(raw indented-text)
 Key Mappings					*$(name)-key-mappings*
 
 @(for mapping)
-$(name)				*$(name)*
+$(append-tabs name)*$(name)*
 $(raw indented-text)
 
 @(end)
@@ -56,7 +56,7 @@ $(raw indented-text)
 Customizing					*$(name)-customizing*
 
 @(for customize)
-$(name)				*$(name)*
+$(append-tabs name)*$(name)*
 $(raw indented-text)
 
 @(end)

@@ -5,7 +5,8 @@
     [clojure.java.io  :as io]
     [clj-yaml.core    :as yaml]
     [cuma.core        :refer [render]]
-    [vimdoc.util.path :as path]))
+    [vimdoc.util.path :as path]
+    cuma.extension.vimdoc))
 
 (def ^:const DOC_DIR_NAME       "doc")
 (def ^:const VIMDOC_YAML        "vimdoc.yml")
