@@ -1,0 +1,5 @@
+FILE       = (STRING | BLOCK)*
+BLOCK      = COMMENT+ DEFINITION
+COMMENT    = #'"""\s*.+\n'
+DEFINITION = #'[^"].*\n'
+STRING     = #'.*(\n+|$)'

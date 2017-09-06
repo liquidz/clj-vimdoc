@@ -4,6 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
+                 [instaparse "1.4.7"]
                  [cuma "0.1.1"]
                  [circleci/clj-yaml "0.5.3"]]
 

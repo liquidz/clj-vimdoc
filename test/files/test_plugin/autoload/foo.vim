@@ -1,22 +1,15 @@
-""
-" hello
-" world
-"
+""" hello
+""" world
 
-""
-" @var
-" enabling flag
-"
-if !exists('g:foo#enale')
-  let g:foo#enable = 0
-endif
+""" @var
+""" enabling flag
+let g:foo#enable = get(g:, 'foo#enable', 0)
 
-""
-" Return (x + y)
-" this is test function
-" Example: >
-"   foo#plus(10, 20)
-" <
+""" Return (x + y)
+""" this is test function
+""" Example: >
+"""   foo#plus(10, 20)
+""" <
 function! foo#plus(x, y) abort
   return a:x + a:y
 endfunction

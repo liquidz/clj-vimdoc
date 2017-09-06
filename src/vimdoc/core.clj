@@ -3,6 +3,7 @@
   (:require
     [clojure.string   :as str]
     [clojure.java.io  :as io]
+    [instaparse.core :as insta]
     ;[clj-yaml.core    :as yaml]
     ;[cuma.core        :refer [render]]
     ;[vimdoc.util.path :as path]
@@ -11,18 +12,33 @@
     )
   )
 
-;(file-seq (io/file "."))
+(def test-bs
+  (-> "parser.txt" io/resource slurp insta/parser))
 
-(defn get-file-list
-  [dir]
-  (println "hell0")
-  (println "aa"
-           )
-  )
+(let [bs (-> "parser.txt" io/resource slurp insta/parser)]
+  (bs (slurp (io/file "./test/files/parse.txt"))))
 
-(let [a 1]
-  ;(file-seq (io/file "/home/ubuntu/src/github.com/liquidz/clj-vimdoc"))
-  )
+;(defn file->list
+;  [path]
+;  (-> path io/file slurp
+;      (str/split #"\r?\n")))
+;
+;(defn get-file-list
+;  [dir]
+;  (file-seq (io/file dir))
+;  )
+;
+;(defn extracter
+;  [lines]
+;  (loop [[line & r] lines, comments [], result []]
+;    (if line
+;
+;      result
+;      )
+;    )
+;  )
+
+
 
 ;(def ^:const DOC_DIR_NAME       "doc")
 ;(def ^:const VIMDOC_YAML        "vimdoc.yml")
