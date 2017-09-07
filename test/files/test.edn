@@ -1,0 +1,9 @@
+{
+ :name "FIXME"
+ :description "your super great extension"
+ :author "FIXME <example@example.com>"
+ :version "1.0.0"
+ :src-dir "test/files/test_plugin"
+ :license "FIXME LICENSE"
+ :exclude [ "vital" "excluded" ]
+ }

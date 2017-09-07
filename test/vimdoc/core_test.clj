@@ -5,9 +5,56 @@
     [vimdoc.core      :refer :all]
     [vimdoc.util.path :as path]))
 
-(deftest extracter-test
-  (is (nil? (extracter (file->list "test/files/test_plugin/autoload/foo.vim"))))
+(deftest parser-test
+  (is (= [:FILE
+          [:STRING "1\n\n"]
+          [:BLOCK [:COMMENT "\"\"\" aaa\n"] [:DEFINITION "2\n"]]
+          [:STRING "3\n\n"]
+          [:BLOCK
+           [:COMMENT "\"\"\" bbb\n"]
+           [:COMMENT "\"\"\" ccc\n"]
+           [:DEFINITION "4\n"]]
+          [:STRING "\n"]
+          [:STRING "5\n"]]
+         (parser (slurp (io/file "test/files/bnf/test.txt"))))))
+
+(deftest parse-definition-test
+  (are [x y] (= (parse-definition [:DEFINITION x]) y)
+    "let foo1 = bar"
+    {:type "variable" :name "foo1"}
+
+    "function! foo#bar1(x, y) abort"
+    {:type "function" :name "foo#bar1(x, y)"}
+    "function foo#bar2(x, y) abort"
+    {:type "function" :name "foo#bar2(x, y)"}
+    "function foo#bar3(x, y)"
+    {:type "function" :name "foo#bar3(x, y)"}
+
+    "command! Foo1 call foo#bar(1, 2)"
+    {:type "command" :name "Foo1"}
+    "command Foo2 call foo#bar(1, 2)"
+    {:type "command" :name "Foo2"}
+	"command! -nargs=1 Foo3 call foo#bar(<q-args>)"
+    {:type "command" :name "Foo3"}
+    "command! -nargs=1 -range=% -complete=customlist Foo4 call foo#bar(<q-args>)"
+    {:type "command" :name "Foo4"}
+
+    "nnoremap <silent> <Plug>(foo1) :<C-u>Foo<CR>"
+    {:type "mapping" :name "<Plug>(foo1)"}
+    "nnoremap <silent> <buffer> <Plug>(foo2) :<C-u>Foo<CR>"
+    {:type "mapping" :name "<Plug>(foo2)"}
+    "nmap <silent> <Plug>(foo3) :<C-u>Foo<CR>"
+    {:type "mapping" :name "<Plug>(foo3)"}
+    )
   )
+
+(deftest collect-test
+  (is (nil?
+        nil
+        ;(collect (io/file "test/files/test_plugin/autoload/foo.vim"))
+        ))
+  )
+
 
 ;(deftest parse-command-test
 ;  (are [x y] (= x (parse-command y))

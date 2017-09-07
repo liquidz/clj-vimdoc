@@ -1,7 +1,6 @@
-""" hello
-""" world
+"" hello
+"" world
 
-""" @var
 """ enabling flag
 let g:foo#enable = get(g:, 'foo#enable', 0)
 

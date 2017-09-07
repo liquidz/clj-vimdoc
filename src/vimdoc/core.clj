@@ -3,6 +3,7 @@
   (:require
     [clojure.string   :as str]
     [clojure.java.io  :as io]
+    [clojure.edn :as edn]
     [instaparse.core :as insta]
     ;[clj-yaml.core    :as yaml]
     ;[cuma.core        :refer [render]]
@@ -12,203 +13,108 @@
     )
   )
 
-(def test-bs
-  (-> "parser.txt" io/resource slurp insta/parser))
+(def ^:const CONFIG_FILE_NAME "vimdoc.edn")
 
-(let [bs (-> "parser.txt" io/resource slurp insta/parser)]
-  (bs (slurp (io/file "./test/files/parse.txt"))))
+(def parser
+  (-> "bnf.txt" io/resource slurp insta/parser))
 
-;(defn file->list
-;  [path]
-;  (-> path io/file slurp
-;      (str/split #"\r?\n")))
-;
-;(defn get-file-list
-;  [dir]
-;  (file-seq (io/file dir))
-;  )
-;
-;(defn extracter
-;  [lines]
-;  (loop [[line & r] lines, comments [], result []]
-;    (if line
-;
-;      result
-;      )
-;    )
-;  )
+(defn filter-block
+  [ls]
+  (filter #(and (sequential? %) (= :BLOCK (first %))) ls))
 
+(defn comment-string
+  "Convert parsed comment list to string
 
+  ex. (list [:COMMENT \"\\\"\\\"\\\" hello\n\"]
+            [:COMMENT \"\\\"\\\"\\\" world\n\"])
+  "
+  [comments]
+  (transduce (comp (map second)
+                   (map #(str/replace-first % #"^\"\"\"\s?" "")))
+             str comments))
 
-;(def ^:const DOC_DIR_NAME       "doc")
-;(def ^:const VIMDOC_YAML        "vimdoc.yml")
-;(def ^:const HELP_TEMPLATE_FILE "help_template.txt")
-;(def ^:const YAML_TEMPLATE_FILE "yaml_template.txt")
-;(def ^:const PLUGIN_DIRS        ["plugin" "autoload" "ftplugin"])
-;
-;(defn- str-drop [n s] (str/join (drop n s)))
-;(defn- meta-line? [s] (.startsWith s "@"))
-;
-;(defn pickup-doc-comments
-;  [filename]
-;  (loop [[line & rest-lines] (str/split-lines (slurp filename))
-;         started? false
-;         tmp      []
-;         result   []]
-;    (if-not line
-;      result
-;      (if started?
-;        (if (.startsWith line "\"")
-;          (recur rest-lines true
-;                 (conj tmp (str-drop 2 line)) result)
-;          (recur rest-lines false
-;                 [] (conj result (conj (seq/trim tmp) line))))
-;        (recur rest-lines (.startsWith line "\"\"") [] result)))))
-;
-;(def ann
-;  {"@introduction" :introduction
-;   "@function"     :function
-;   "@command"      :command
-;   "@customize"    :customize
-;   "@var"          :customize
-;   "@changelog"    :changelog})
-;
-;(defn- get-type-from-comments
-;  [cs]
-;  (->> cs
-;       (filter meta-line?)
-;       (map #(get ann %))
-;       (drop-while nil?)
-;       first))
-;
-;(defn- get-type-from-definition
-;  [s]
-;  (condp #(.startsWith %2 %1) s
-;    "function" :function
-;    "command"  :command
-;    "imap"     :mapping
-;    "inoremap" :mapping
-;    "nmap"     :mapping
-;    "nnoremap" :mapping
-;    "vmap"     :mapping
-;    "vnoremap" :mapping
-;    "xmap"     :mapping
-;    "xnoremap" :mapping
-;    nil))
-;
-;(defn parse-function
-;  [s]
-;  (let [regexp #"function!?\s+([^ (]+?)\s*(\(.*?\))"
-;        [_ func arg] (re-find regexp s)]
-;    {:name func
-;     :arg  arg}))
-;
-;(defn parse-command
-;  [s]
-;  (->> (str/split s #"\s+")
-;       (drop 1)
-;       (drop-while #(.startsWith % "-"))
-;       first
-;       (hash-map :name)))
-;
-;(defn parse-mapping
-;  [s]
-;  {:name (re-find #"<Plug>[^ ]+" s)})
-;
-;(defn parse-customize
-;  [s]
-;  {:name (re-find #"g:[^'\" ]+" s)})
-;
-;(defn- add-indent
-;  [s]
-;  (if (= s "<") s (str "\t" s)))
-;
-;(defn parse-doc
-;  [doc]
-;  (let [strings    (drop-last doc)
-;        definition (last doc)
-;        t (or (get-type-from-comments strings)
-;              (get-type-from-definition definition)
-;              :introduction)
-;        lines (remove meta-line? strings)
-;        text  (str/join "\n" lines)
-;        indented-text (str/join "\n" (map add-indent lines))
-;        base {:type t, :text text, :indented-text indented-text}]
-;    (merge
-;      base
-;      (case t
-;        :function  (parse-function definition)
-;        :command   (parse-command definition)
-;        :customize (parse-customize definition)
-;        :mapping   (parse-mapping definition)
-;        {}))))
-;
-;(defn categorize-docs
-;  [docs]
-;  (let [join-text-fn #(if (seq %) (str/join "\n" (map :text %)))]
-;    (-> (group-by :type docs)
-;        (update-in [:introduction] join-text-fn)
-;        (update-in [:changelog] join-text-fn))))
-;
-;(defn render-help
-;  ([docs]
-;   (render-help HELP_TEMPLATE_FILE docs))
-;  ([tmpl-file docs]
-;   (-> tmpl-file
-;       io/resource
-;       slurp
-;       (render docs))))
-;
-;(defn load-config
-;  [filename]
-;  (-> filename slurp yaml/parse-string
-;      (update-in [:exclude] #(map re-pattern %))))
-;
-;(defn get-vim-files
-;  [dir]
-;  (->> PLUGIN_DIRS
-;       (map #(path/join dir %))
-;       (mapcat (comp file-seq io/file))
-;       (filter path/file?)
-;       (filter #(.endsWith (.getName %) ".vim"))))
-;
-;(defn exclude-files
-;  [exclude-list files]
-;  (reduce
-;    (fn [res exclude-regexp]
-;      (remove #(re-find exclude-regexp (.getAbsolutePath %)) res))
-;    files
-;    exclude-list))
-;
-;(defn generate-helpfile
-;  [target-dir conf]
-;  (->> (get-vim-files target-dir)
-;       (exclude-files (:exclude conf))
-;       (mapcat pickup-doc-comments)
-;       (map parse-doc)
-;       categorize-docs
-;       (merge conf)
-;       render-help))
-;
-;(defn write-helpfile
-;  [target-dir]
-;  (let [doc-dir    (path/join target-dir DOC_DIR_NAME)
-;        conf       (load-config (path/join target-dir VIMDOC_YAML))
-;        help-file  (path/join doc-dir (str (:name conf) ".txt"))]
-;    (.mkdir (io/file doc-dir))
-;    (spit help-file (generate-helpfile target-dir conf))))
-;
-;(defn write-initial-vimdoc
-;  []
-;  (let [s (-> YAML_TEMPLATE_FILE io/resource slurp (render {}))
-;        f (io/file (path/join "." VIMDOC_YAML))]
-;    (spit f s)))
-;
-;(defn -main
-;  [subcmd]
-;  (condp = subcmd
-;    "init" (do (println (str "generating " VIMDOC_YAML " ..."))
-;               (write-initial-vimdoc))
-;    (let [target-dir (.getAbsolutePath (io/file subcmd))
-;          conf       (load-config (path/join target-dir VIMDOC_YAML))]
-;      (write-helpfile target-dir))))
+(defmacro re-cond
+  [s & clauses]
+  (loop [[[regexp body] & ls] (reverse (partition 2 clauses))
+         res 'nil ]
+    (if (and regexp body)
+      (recur ls `(if-let [~'% (re-seq ~regexp ~s)]
+                  ~body
+                  ~res))
+      res)))
+
+(defn parse-definition
+  [definition]
+  (let [definition (second definition)
+        ]
+    (re-cond definition
+      ;; variable
+      #"\s*let (.+?)\s+="
+      (let [[[_ var-name]] %]
+        {:type "variable" :name var-name})
+      ;; function
+      #"\s*function!? (.+?)\((.+?)\)"
+      (let [[[_ func-name func-args]] %]
+        {:type "function" :name (format "%s(%s)" func-name func-args)})
+      ;; command
+	  #"\s*command!?( \-[^=]+=[^ ]+)* (.+?) "
+      (let [[ls] %]
+        {:type "command" :name (last ls)})
+      ;; mapping
+      #"\s*n(nore)?map( <[^>]+>)* (.+?) "
+      (let [[ls] %]
+        {:type "mapping" :name (last ls)}))))
+
+(defn parse-block
+  [block]
+  (let [block      (rest block)
+        comments   (->> block drop-last comment-string)
+        definition (-> block last parse-definition)]
+    (assoc definition :comments (str/trim comments))))
+
+(defn parse-file
+  [file]
+  (into []
+        (comp (filter #(and (sequential? %) (= :BLOCK (first %))))
+              (map parse-block))
+        (parser (slurp file))))
+
+(defn get-file-list
+  [{:keys [src-dir exclude] :or {src-dir ".", exclude []}}]
+  (into []
+        (comp (remove #(.isDirectory %))
+              (filter #(str/index-of (.getAbsolutePath %) ".vim"))
+              (remove (fn [file] (some #(str/index-of (.getAbsolutePath file) %) exclude))))
+        (file-seq (io/file src-dir))))
+
+(defn read-config
+  [path]
+  (-> path io/file slurp edn/read-string))
+
+(defn run
+  [config]
+  (let [files (get-file-list config)
+        data  (mapcat parse-file files)
+        ]
+    (group-by :type data)
+    )
+  )
+
+;(-> "test/files/test.edn" read-config run)
+
+(defn -main
+  [& args]
+  (try
+    (let [config (read-config CONFIG_FILE_NAME)
+          files  (get-file-list config)
+          data (mapcat parse-file files)
+          ]
+
+      data
+      )
+
+    (catch Exception e
+      (System/exit 1)
+      )
+    )
+  )
