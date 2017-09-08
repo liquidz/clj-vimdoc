@@ -1,8 +1,0 @@
----
-name: foo
-description: bar
-version: 0.1.0
-author: uochan
-license: VIM LICENSE
-exclude:
-  - .*excluded.*
